@@ -129,11 +129,18 @@ let clickCount = 0;
 let musicMode = 1;
 let isSwitching = false;
 
-// Автозапуск музыки
-window.addEventListener("load", ()=>{
-  bgMusic.src="mp3n1/mr-mars-pidor.mp3";
-  bgMusic.volume=0.7;
-  bgMusic.play().catch(()=>{document.addEventListener("click",()=>{bgMusic.play();},{once:true});});
+// Автозапуск музыки и поддержка возврата назад
+function startMusic(){
+  bgMusic.src = "mp3n1/mr-mars-pidor.mp3";
+  bgMusic.volume = 0.7;
+  bgMusic.play().catch(()=>{
+    document.addEventListener("click", ()=>{ bgMusic.play(); }, {once:true});
+  });
+}
+
+window.addEventListener("load", startMusic);
+window.addEventListener("pageshow", (event)=>{
+  if(event.persisted) startMusic(); // при возврате назад
 });
 
 // Плавная смена видео и музыки
@@ -141,10 +148,8 @@ function changeVideoSmooth(path, newMusic){
   if(isSwitching) return;
   isSwitching = true;
 
-  // fade-out видео
   videoBg.style.opacity = 0;
 
-  // плавное уменьшение громкости старой музыки
   const oldVolume = bgMusic.volume;
   let fadeOut = setInterval(()=>{
     if(bgMusic.volume > 0.05) bgMusic.volume -= 0.05;
@@ -152,7 +157,6 @@ function changeVideoSmooth(path, newMusic){
   },50);
 
   setTimeout(()=>{
-    // смена видео и музыки
     videoBg.querySelector("source").src = path;
     videoBg.load();
     videoBg.play();
@@ -161,13 +165,12 @@ function changeVideoSmooth(path, newMusic){
     bgMusic.volume = 0;
     bgMusic.play();
 
-    // fade-in музыки
     let fadeIn = setInterval(()=>{
       if(bgMusic.volume < oldVolume) bgMusic.volume += 0.05;
       else { bgMusic.volume = oldVolume; clearInterval(fadeIn); }
     },50);
 
-    videoBg.style.opacity = 1; // fade-in видео
+    videoBg.style.opacity = 1;
     setTimeout(()=>{ isSwitching=false; },1000);
   },800);
 }
@@ -193,14 +196,12 @@ avatar.addEventListener('click', ()=>{
 document.querySelectorAll('.folder-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     const content = btn.nextElementSibling;
-    // закрыть все кроме текущей
     document.querySelectorAll('.folder-content').forEach(fc=>{
       if(fc!==content) fc.style.maxHeight = "0";
     });
     document.querySelectorAll('.folder-btn').forEach(b=>{
       if(b!==btn) b.classList.remove('open');
     });
-    // переключение текущей
     if(content.style.maxHeight && content.style.maxHeight!=="0px"){
       content.style.maxHeight = "0";
       btn.classList.remove('open');
