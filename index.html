@@ -6,28 +6,26 @@
 <title>MrMars</title>
 
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
-body, html { height:100vh; font-family:'Poppins',sans-serif; color:white; overflow:hidden; }
+*{margin:0;padding:0;box-sizing:border-box;}
+body,html{height:100vh;font-family:'Poppins',sans-serif;color:white;overflow:hidden;}
 
-/* Видео фон */
 .video-bg{
   position:fixed;
-  top:0; left:0;
-  width:100%; height:100%;
+  top:0;left:0;
+  width:100%;height:100%;
   object-fit:cover;
   z-index:-2;
   transition:opacity 0.8s ease;
 }
-.video-bg.fade-out{ opacity:0; }
+.video-bg.fade-out{opacity:0;}
 
 .overlay{
   position:fixed;
-  width:100%; height:100%;
+  width:100%;height:100%;
   background:rgba(0,0,0,0.25);
   z-index:-1;
 }
 
-/* Контент */
 .container{
   position:relative;
   width:100%;
@@ -53,7 +51,6 @@ body, html { height:100vh; font-family:'Poppins',sans-serif; color:white; overfl
   box-shadow:0 0 50px rgba(0,255,255,0.9);
 }
 
-/* Кнопки */
 .btn{
   display:block;
   width:220px;
@@ -65,37 +62,33 @@ body, html { height:100vh; font-family:'Poppins',sans-serif; color:white; overfl
   font-weight:600;
   font-size:16px;
   text-decoration:none;
-  cursor:pointer;
   backdrop-filter:blur(5px);
-  text-shadow:0 2px 6px rgba(0,0,0,0.5);
   letter-spacing:0.5px;
   opacity:0;
   transform:translateY(30px);
-  transition:transform 0.3s, background 0.3s, box-shadow 0.3s;
+  transition:0.3s;
 }
 .btn:hover{
   background:linear-gradient(135deg,#612d31,#5c1924);
-  transform:translateY(0) scale(1.08);
+  transform:scale(1.08);
   box-shadow:0 0 20px rgba(255,255,255,0.6);
 }
 
-@keyframes appear{ to{ opacity:1; transform:translateY(0);} }
+@keyframes appear{to{opacity:1;transform:translateY(0);}}
 
 @media(max-width:480px){
-  .avatar{ width:100px; height:100px; }
-  .btn{ width:180px; padding:12px; font-size:14px; }
+  .avatar{width:100px;height:100px;}
+  .btn{width:180px;padding:12px;font-size:14px;}
 }
 </style>
 </head>
 <body>
 
-<!-- Видео -->
 <video id="videoBg" class="video-bg" autoplay muted loop playsinline>
   <source src="fon/folt.mp4" type="video/mp4">
 </video>
 <div class="overlay"></div>
 
-<!-- Контент -->
 <div class="container">
   <img src="Img/channels4_profile.jpg" class="avatar" id="avatar">
 
@@ -107,77 +100,82 @@ body, html { height:100vh; font-family:'Poppins',sans-serif; color:white; overfl
   <a href="https://vk.me/join/MK4DXzal9yFLnyZkTXu8X5PfG6i_MrmfpmQ=" class="btn">VK Беседа</a>
 </div>
 
-<!-- Музыка -->
-<audio id="bgMusic" loop>
-  <source src="mp3/mort.mp3" type="audio/mpeg">
-</audio>
+<!-- ОДИН аудио элемент -->
+<audio id="bgMusic" loop></audio>
 
 <script>
-// Анимация кнопок
-const buttons = document.querySelectorAll('.btn');
-buttons.forEach((btn, i) => {
-  btn.style.animation = `appear 0.5s forwards ${i*0.2 + 0.2}s`;
+document.querySelectorAll('.btn').forEach((btn,i)=>{
+  btn.style.animation=`appear .5s forwards ${i*0.2+.2}s`;
 });
 
-const avatar = document.getElementById('avatar');
-const bgMusic = document.getElementById('bgMusic');
-const videoBg = document.getElementById('videoBg');
+const avatar=document.getElementById('avatar');
+const bgMusic=document.getElementById('bgMusic');
+const videoBg=document.getElementById('videoBg');
 
-let clickCount = 0;
-let musicPlaying = false;
-let isSwitching = false;
+let clickCount=0;
+let musicMode=1; // 1 = стартовая музыка, 2 = mort.mp3
+let isSwitching=false;
 
-// Функция плавной смены видео с ПОЛНЫМ перезапуском
+/* ===== АВТОЗАПУСК ПЕРВОЙ МУЗЫКИ ===== */
+window.addEventListener("load",()=>{
+  bgMusic.src="mp3n1/mr-mars-pidor.mp3";
+  bgMusic.volume=0.7;
+
+  bgMusic.play().catch(()=>{
+    document.addEventListener("click",()=>{
+      bgMusic.play();
+    },{once:true});
+  });
+});
+
+/* ===== СМЕНА ВИДЕО ===== */
 function changeVideo(path){
   if(isSwitching) return;
-  isSwitching = true;
+  isSwitching=true;
 
   videoBg.classList.add("fade-out");
 
-  setTimeout(() => {
+  setTimeout(()=>{
     videoBg.pause();
-    videoBg.currentTime = 0;
+    videoBg.currentTime=0;
 
-    const source = videoBg.querySelector("source");
-    source.src = path;
+    const source=videoBg.querySelector("source");
+    source.src=path;
 
     videoBg.load();
-    videoBg.currentTime = 0;
+    videoBg.currentTime=0;
     videoBg.play();
 
     videoBg.classList.remove("fade-out");
 
-    setTimeout(() => {
-      isSwitching = false;
-    }, 800);
+    setTimeout(()=>{isSwitching=false;},800);
 
-  }, 400);
+  },400);
 }
 
-avatar.addEventListener('click', () => {
+/* ===== 3 КЛИКА ===== */
+avatar.addEventListener('click',()=>{
   clickCount++;
 
-  if(clickCount >= 3){
+  if(clickCount>=3){
 
-    if(!musicPlaying){
-      bgMusic.currentTime = 0;
-      bgMusic.play();
+    bgMusic.pause();
+    bgMusic.currentTime=0;
 
-      avatar.classList.add('active');
-      changeVideo('fon2/mortol.mp4');
-
-      musicPlaying = true;
-    } else {
-      bgMusic.pause();
-      bgMusic.currentTime = 0;
-
-      avatar.classList.remove('active');
-      changeVideo('fon/folt.mp4');
-
-      musicPlaying = false;
+    if(musicMode===1){
+      bgMusic.src="mp3/mort.mp3";
+      changeVideo("fon2/mortol.mp4");
+      avatar.classList.add("active");
+      musicMode=2;
+    }else{
+      bgMusic.src="mp3n1/mr-mars-pidor.mp3";
+      changeVideo("fon/folt.mp4");
+      avatar.classList.remove("active");
+      musicMode=1;
     }
 
-    clickCount = 0;
+    bgMusic.play();
+    clickCount=0;
   }
 });
 </script>
